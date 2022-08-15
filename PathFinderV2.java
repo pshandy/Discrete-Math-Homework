@@ -1,56 +1,66 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class PathFinderV2 {
 
-    private static final int SIZE = 4;
+    int v; // Количество вершин
+    ArrayList<Integer>[] adjList; // Матрица смежности
 
-    public static void solve(int current, int end,
-							 boolean[] isVisited, ArrayList<Integer> path, int[][] matrix,
-							 boolean isCustomLen) {
-
-        //Если текущая вершина = конечной и путь до неё 4, выход из функции
-        if (current == end) {
-            if (path.size() == SIZE + 1 && isCustomLen)
-                System.out.println(path);
-            return;
-        }
-
-        isVisited[current] = true;
-
-        //Рекурсивный обход графа, если есть путь в другую непосещенную вершину,
-        //происходит повторная обработка вершины
-        for (Integer i = 0; i < matrix.length; i++)
-            if (matrix[current][i] == 1 && !isVisited[i]) {
-                path.add(i);
-                solve(i, end, isVisited, path, matrix, isCustomLen);
-                path.remove(i);
-            }
-
-        isVisited[current] = false;
+    public PathFinderV2(int v) {
+        this.v = v;
+        adjList = new ArrayList[v];
+        for (int i = 0; i < v; i++)
+            adjList[i] = new ArrayList<>();
     }
 
     public static void main(String[] args) {
 
-        int[][] matrix = {
-                /*    0  1  2  3  4  5  6
-                /*0*/{0, 1, 0, 0, 0, 0, 0},
-                /*1*/{1, 0, 1, 1, 0, 0, 0},
-                /*2*/{0, 1, 0, 0, 0, 1, 0},
-                /*3*/{0, 1, 0, 0, 1, 1, 0},
-                /*4*/{0, 0, 0, 1, 0, 1, 0},
-                /*5*/{0, 0, 1, 1, 1, 0, 1},
-                /*6*/{0, 0, 0, 0, 0, 1, 0}};
+        PathFinderV2 g = new PathFinderV2(4);
 
-        ArrayList<Integer> path = new ArrayList<>(); // Буффер для записи текущего путя
-        boolean[] isVisited = new boolean[matrix.length];    // Массив с пометками о пройденных вершинах
+        g.addEdge(0, 1);
+        g.addEdge(0, 2);
+        g.addEdge(0, 3);
+        g.addEdge(2, 0);
+        g.addEdge(2, 1);
+        g.addEdge(1, 3);
 
-        int start = 0;
-        int end = 5;
+        g.printAllPaths(2, 3);
 
-        path.add(start); //Добавление начальной вершины в путь
-        System.out.println("Все пути между " + start + " и " + end + " вершинами длиной 4:");
-        solve(start, end, isVisited, path, matrix, true);
+    }
 
+    // Добавление ребра в матрицу
+    void addEdge(int from, int to) {
+        adjList[from].add(to);
+    }
+
+    public void printAllPaths(int s, int d) {
+        boolean[] isVisited = new boolean[v];
+        ArrayList<Integer> pathList = new ArrayList<>();
+
+        pathList.add(s);
+        printAllPathsUtil(s, d, isVisited, pathList);
+    }
+
+    private void printAllPathsUtil(Integer u, Integer d,
+                                   boolean[] isVisited,
+                                   List<Integer> localPathList) {
+
+        if (u.equals(d)) {
+            System.out.println(localPathList);
+            return;
+        }
+
+        isVisited[u] = true;
+
+        for (Integer i : adjList[u]) {
+            if (!isVisited[i]) {
+                localPathList.add(i);
+                printAllPathsUtil(i, d, isVisited, localPathList);
+                localPathList.remove(i);
+            }
+        }
+
+        isVisited[u] = false;
     }
 
 }
